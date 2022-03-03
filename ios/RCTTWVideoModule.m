@@ -397,7 +397,7 @@ RCT_EXPORT_METHOD(getStats) {
   }
 }
 
-RCT_EXPORT_METHOD(connect:(NSString *)accessToken roomName:(NSString *)roomName enableAudio:(BOOL *)enableAudio enableVideo:(BOOL *)enableVideo encodingParameters:(NSDictionary *)encodingParameters enableNetworkQualityReporting:(BOOL *)enableNetworkQualityReporting dominantSpeakerEnabled:(BOOL *)dominantSpeakerEnabled cameraType:(NSString *)cameraType) {
+RCT_EXPORT_METHOD(connect:(NSString *)accessToken roomName:(NSString *)roomName enableAudio:(BOOL *)enableAudio enableVideo:(BOOL *)enableVideo enableData:(BOOL *)enableData encodingParameters:(NSDictionary *)encodingParameters enableNetworkQualityReporting:(BOOL *)enableNetworkQualityReporting dominantSpeakerEnabled:(BOOL *)dominantSpeakerEnabled cameraType:(NSString *)cameraType) {
   [self _setLocalVideoEnabled:enableVideo cameraType:cameraType];
   if (self.localAudioTrack) {
     [self.localAudioTrack setEnabled:enableAudio];
@@ -412,11 +412,13 @@ RCT_EXPORT_METHOD(connect:(NSString *)accessToken roomName:(NSString *)roomName 
       builder.audioTracks = @[self.localAudioTrack];
     }
 
+   if (enableData) {
     self.localDataTrack = [TVILocalDataTrack track];
 
     if (self.localDataTrack) {
       builder.dataTracks = @[self.localDataTrack];
     }
+  }
       
     builder.dominantSpeakerEnabled = dominantSpeakerEnabled ? YES : NO;
 
@@ -443,7 +445,9 @@ RCT_EXPORT_METHOD(connect:(NSString *)accessToken roomName:(NSString *)roomName 
 }
 
 RCT_EXPORT_METHOD(sendString:(nonnull NSString *)message) {
+  if(self.localDataTrack) {
     [self.localDataTrack sendString:message];
+  }
     //NSData *data = [message dataUsingEncoding:NSUTF8StringEncoding];
     //[self.localDataTrack sendString:message];
 }
