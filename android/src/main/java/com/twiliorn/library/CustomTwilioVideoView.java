@@ -431,6 +431,7 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
             String accessToken,
             boolean enableAudio,
             boolean enableVideo,
+            boolean enableData,
             boolean enableRemoteAudio,
             boolean enableNetworkQualityReporting,
             boolean dominantSpeakerEnabled,

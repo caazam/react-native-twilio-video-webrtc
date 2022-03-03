@@ -243,6 +243,7 @@ export default class TwilioVideo extends Component {
     cameraType = 'front',
     enableAudio = true,
     enableVideo = true,
+    enableData = false,
     encodingParameters = null,
     enableNetworkQualityReporting = false,
     dominantSpeakerEnabled = false
@@ -251,6 +252,7 @@ export default class TwilioVideo extends Component {
       roomName,
       enableAudio,
       enableVideo,
+      enableData,
       encodingParameters,
       enableNetworkQualityReporting,
       dominantSpeakerEnabled,

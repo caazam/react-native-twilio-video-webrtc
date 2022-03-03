@@ -78,16 +78,18 @@ public class CustomTwilioVideoViewManager extends SimpleViewManager<CustomTwilio
                 String accessToken = args.getString(1);
                 boolean enableAudio = args.getBoolean(2);
                 boolean enableVideo = args.getBoolean(3);
-                boolean enableRemoteAudio = args.getBoolean(4);
-                boolean enableNetworkQualityReporting = args.getBoolean(5);
-                boolean dominantSpeakerEnabled = args.getBoolean(6);
-                boolean maintainVideoTrackInBackground = args.getBoolean(7);
+                boolean enableData = args.getBoolean(4);
+                boolean enableRemoteAudio = args.getBoolean(5);
+                boolean enableNetworkQualityReporting = args.getBoolean(6);
+                boolean dominantSpeakerEnabled = args.getBoolean(7);
+                boolean maintainVideoTrackInBackground = args.getBoolean(8);
                 String cameraType = args.getString(8);
                 view.connectToRoomWrapper(
                     roomName,
                     accessToken,
                     enableAudio,
                     enableVideo,
+                    enableData,
                     enableRemoteAudio,
                     enableNetworkQualityReporting,
                     dominantSpeakerEnabled,
