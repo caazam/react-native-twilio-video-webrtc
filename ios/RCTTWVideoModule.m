@@ -39,7 +39,7 @@ static NSString* statsReceived                = @"statsReceived";
 static NSString* networkQualityLevelsChanged  = @"networkQualityLevelsChanged";
 
 CMVideoDimensions videoDimensions;
-NSInteger fps = 30;
+NSInteger videoFps = 30;
 
 @interface RCTTWVideoModule () <TVIRemoteDataTrackDelegate, TVIRemoteParticipantDelegate, TVIRoomDelegate, TVICameraSourceDelegate, TVILocalParticipantDelegate>
 
@@ -192,7 +192,7 @@ RCT_EXPORT_METHOD(startLocalVideo) {
             break;
         }
     }
-    selectedFormat.frameRate = fps;
+    selectedFormat.frameRate = videoFps;
     return selectedFormat;
 }
 
@@ -397,8 +397,8 @@ RCT_EXPORT_METHOD(getStats) {
 
 RCT_EXPORT_METHOD(connect:(NSString *)accessToken roomName:(NSString *)roomName enableAudio:(BOOL *)enableAudio enableVideo:(BOOL *)enableVideo enableData:(BOOL *)enableData encodingParameters:(NSDictionary *)encodingParameters enableNetworkQualityReporting:(BOOL *)enableNetworkQualityReporting dominantSpeakerEnabled:(BOOL *)dominantSpeakerEnabled cameraType:(NSString *)cameraType)
 {
-  if (encodingParameters[@"fps"]) {
-    fps = [encodingParameters[@"fps"] integerValue];
+  if (encodingParameters[@"videoFps"]) {
+    videoFps = [encodingParameters[@"videoFps"] integerValue];
   }
   if(encodingParameters[@"videoWidth"] && encodingParameters[@"videoHeight"]) {
     int32_t videoWidth = (int32_t)[encodingParameters[@"videoWidth"] integerValue];

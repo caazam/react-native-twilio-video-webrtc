@@ -128,7 +128,7 @@ declare module "react-native-twilio-video-webrtc" {
       videoBitrate?: number;
       videoWidth?: number;
       videoHeight?: number;
-      fps?: number;
+      videoFps?: number;
     };
     enableNetworkQualityReporting?: boolean;
   };
