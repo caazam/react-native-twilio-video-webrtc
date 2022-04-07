@@ -36,7 +36,7 @@ static NSString* cameraDidStopRunning         = @"cameraDidStopRunning";
 static NSString* statsReceived                = @"statsReceived";
 static NSString* networkQualityLevelsChanged  = @"networkQualityLevelsChanged";
 
-CMVideoDimensions videoDimensions;
+CMVideoDimensions videoDimensions = (CMVideoDimensions){1280, 720};
 NSInteger videoFps = 30;
 
 @interface RCTTWVideoModule () <TVIRemoteDataTrackDelegate, TVIRemoteParticipantDelegate, TVIRoomDelegate, TVICameraSourceDelegate, TVILocalParticipantDelegate>
