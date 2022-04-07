@@ -10,8 +10,6 @@
 
 #import "RCTTWSerializable.h"
 
-#define IPAD UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad
-
 static NSString* roomDidConnect               = @"roomDidConnect";
 static NSString* roomDidDisconnect            = @"roomDidDisconnect";
 static NSString* roomDidFailToConnect         = @"roomDidFailToConnect";
@@ -404,8 +402,6 @@ RCT_EXPORT_METHOD(connect:(NSString *)accessToken roomName:(NSString *)roomName 
     int32_t videoWidth = (int32_t)[encodingParameters[@"videoWidth"] integerValue];
     int32_t videoHeight = (int32_t)[encodingParameters[@"videoHeight"] integerValue];
     videoDimensions = (CMVideoDimensions){videoWidth, videoHeight};
-  } else {
-    videoDimensions = IPAD ? (CMVideoDimensions){1280, 720} : (CMVideoDimensions){1024, 768};
   }
   [self _setLocalVideoEnabled:enableVideo cameraType:cameraType];
   if (self.localAudioTrack) {
