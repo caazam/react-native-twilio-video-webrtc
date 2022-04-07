@@ -176,21 +176,23 @@ RCT_EXPORT_METHOD(startLocalVideo) {
 }
 
 -(TVIVideoFormat *)videoFormat: (AVCaptureDevice *) device {
-    TVIVideoFormat *selectedFormat = nil;
     NSOrderedSet<TVIVideoFormat *> *formats = [TVICameraSource supportedFormatsForDevice:device];
 
     for (TVIVideoFormat *format in formats) {
-        if (format.pixelFormat != TVIPixelFormatYUV420BiPlanarFullRange) {
-            continue;
-        }
-        selectedFormat = format;
         CMVideoDimensions dimensions = format.dimensions;
-
-        if (dimensions.width >= videoDimensions.width && dimensions.height >= videoDimensions.height) {
-            break;
+        if (dimensions.width >= videoDimensions.width &&
+            dimensions.height >= videoDimensions.height &&
+            format.frameRate >= videoFps)
+        {
+            return format;
         }
     }
-    selectedFormat.frameRate = videoFps;
+
+    TVIVideoFormat *selectedFormat = [[TVIVideoFormat alloc] init];
+    selectedFormat.dimensions = (CMVideoDimensions){1280, 720};
+    selectedFormat.frameRate = 30;
+    selectedFormat.pixelFormat = TVIPixelFormatYUV420BiPlanarVideoRange;
+
     return selectedFormat;
 }
 
