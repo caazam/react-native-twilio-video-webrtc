@@ -126,6 +126,9 @@ declare module "react-native-twilio-video-webrtc" {
       // if audioBitrate OR videoBitrate is provided, you must provide both
       audioBitrate?: number;
       videoBitrate?: number;
+      videoWidth?: number;
+      videoHeight?: number;
+      fps?: number;
     };
     enableNetworkQualityReporting?: boolean;
   };

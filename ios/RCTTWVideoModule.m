@@ -10,6 +10,8 @@
 
 #import "RCTTWSerializable.h"
 
+#define IPAD UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad
+
 static NSString* roomDidConnect               = @"roomDidConnect";
 static NSString* roomDidDisconnect            = @"roomDidDisconnect";
 static NSString* roomDidFailToConnect         = @"roomDidFailToConnect";
@@ -36,30 +38,8 @@ static NSString* cameraDidStopRunning         = @"cameraDidStopRunning";
 static NSString* statsReceived                = @"statsReceived";
 static NSString* networkQualityLevelsChanged  = @"networkQualityLevelsChanged";
 
-static const CMVideoDimensions kRCTTWVideoAppCameraSourceDimensions = (CMVideoDimensions){900, 720};
-
-static const int32_t kRCTTWVideoCameraSourceFrameRate = 15;
-
-TVIVideoFormat *RCTTWVideoModuleCameraSourceSelectVideoFormatBySize(AVCaptureDevice *device, CMVideoDimensions targetSize) {
-    TVIVideoFormat *selectedFormat = nil;
-    // Ordered from smallest to largest.
-    NSOrderedSet<TVIVideoFormat *> *formats = [TVICameraSource supportedFormatsForDevice:device];
-
-    for (TVIVideoFormat *format in formats) {
-        if (format.pixelFormat != TVIPixelFormatYUV420BiPlanarFullRange) {
-            continue;
-        }
-        selectedFormat = format;
-        // ^ Select whatever is available until we find one we like and short-circuit
-        CMVideoDimensions dimensions = format.dimensions;
-
-        if (dimensions.width >= targetSize.width && dimensions.height >= targetSize.height) {
-            break;
-        }
-    }
-    return selectedFormat;
-}
-
+CMVideoDimensions videoDimensions;
+NSInteger fps = 30;
 
 @interface RCTTWVideoModule () <TVIRemoteDataTrackDelegate, TVIRemoteParticipantDelegate, TVIRoomDelegate, TVICameraSourceDelegate, TVILocalParticipantDelegate>
 
@@ -176,26 +156,44 @@ RCT_EXPORT_METHOD(startLocalVideo) {
 }
 
 - (void)startCameraCapture:(NSString *)cameraType {
-  if (self.camera == nil) {
-    return;
-  }
-  AVCaptureDevice *camera;
+    if (self.camera == nil) {
+        return;
+    }
+    AVCaptureDevice *camera;
     if ([cameraType isEqualToString:@"back"]) {
-    camera = [TVICameraSource captureDeviceForPosition:AVCaptureDevicePositionBack];
-  } else {
-    camera = [TVICameraSource captureDeviceForPosition:AVCaptureDevicePositionFront];
-  }
+        camera = [TVICameraSource captureDeviceForPosition:AVCaptureDevicePositionBack];
+    } else {
+        camera = [TVICameraSource captureDeviceForPosition:AVCaptureDevicePositionFront];
+    }
+    [self.camera startCaptureWithDevice:camera format: [self videoFormat:camera] completion:^(AVCaptureDevice *device,
+                                                                                              TVIVideoFormat *startFormat,
+                                                                                              NSError *error) {
+        if (!error) {
+            for (TVIVideoView *renderer in self.localVideoTrack.renderers) {
+                [self updateLocalViewMirroring:renderer];
+            }
+            [self sendEventCheckingListenerWithName:cameraDidStart body:nil];
+        }
+    }];
+}
 
-  [self.camera startCaptureWithDevice:camera completion:^(AVCaptureDevice *device,
-          TVIVideoFormat *startFormat,
-          NSError *error) {
-      if (!error) {
-          for (TVIVideoView *renderer in self.localVideoTrack.renderers) {
-            [self updateLocalViewMirroring:renderer];
-          }
-          [self sendEventCheckingListenerWithName:cameraDidStart body:nil];
-      }
-  }];
+-(TVIVideoFormat *)videoFormat: (AVCaptureDevice *) device {
+    TVIVideoFormat *selectedFormat = nil;
+    NSOrderedSet<TVIVideoFormat *> *formats = [TVICameraSource supportedFormatsForDevice:device];
+
+    for (TVIVideoFormat *format in formats) {
+        if (format.pixelFormat != TVIPixelFormatYUV420BiPlanarFullRange) {
+            continue;
+        }
+        selectedFormat = format;
+        CMVideoDimensions dimensions = format.dimensions;
+
+        if (dimensions.width >= videoDimensions.width && dimensions.height >= videoDimensions.height) {
+            break;
+        }
+    }
+    selectedFormat.frameRate = fps;
+    return selectedFormat;
 }
 
 RCT_EXPORT_METHOD(startLocalAudio) {
@@ -397,7 +395,18 @@ RCT_EXPORT_METHOD(getStats) {
   }
 }
 
-RCT_EXPORT_METHOD(connect:(NSString *)accessToken roomName:(NSString *)roomName enableAudio:(BOOL *)enableAudio enableVideo:(BOOL *)enableVideo enableData:(BOOL *)enableData encodingParameters:(NSDictionary *)encodingParameters enableNetworkQualityReporting:(BOOL *)enableNetworkQualityReporting dominantSpeakerEnabled:(BOOL *)dominantSpeakerEnabled cameraType:(NSString *)cameraType) {
+RCT_EXPORT_METHOD(connect:(NSString *)accessToken roomName:(NSString *)roomName enableAudio:(BOOL *)enableAudio enableVideo:(BOOL *)enableVideo enableData:(BOOL *)enableData encodingParameters:(NSDictionary *)encodingParameters enableNetworkQualityReporting:(BOOL *)enableNetworkQualityReporting dominantSpeakerEnabled:(BOOL *)dominantSpeakerEnabled cameraType:(NSString *)cameraType)
+{
+  if (encodingParameters[@"fps"]) {
+    fps = [encodingParameters[@"fps"] integerValue];
+  }
+  if(encodingParameters[@"videoWidth"] && encodingParameters[@"videoHeight"]) {
+    int32_t videoWidth = (int32_t)[encodingParameters[@"videoWidth"] integerValue];
+    int32_t videoHeight = (int32_t)[encodingParameters[@"videoHeight"] integerValue];
+    videoDimensions = (CMVideoDimensions){videoWidth, videoHeight};
+  } else {
+    videoDimensions = IPAD ? (CMVideoDimensions){1280, 720} : (CMVideoDimensions){1024, 768};
+  }
   [self _setLocalVideoEnabled:enableVideo cameraType:cameraType];
   if (self.localAudioTrack) {
     [self.localAudioTrack setEnabled:enableAudio];
