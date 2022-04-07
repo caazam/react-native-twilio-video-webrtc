@@ -273,7 +273,7 @@ RCT_EXPORT_METHOD(flipCamera) {
         BOOL mirror = nextPosition == AVCaptureDevicePositionFront;
 
         AVCaptureDevice *captureDevice = [TVICameraSource captureDeviceForPosition:nextPosition];
-        [self.camera selectCaptureDevice:captureDevice completion:^(AVCaptureDevice *device,
+        [self.camera selectCaptureDevice:captureDevice format: [self videoFormat:captureDevice] completion:^(AVCaptureDevice *device,
                 TVIVideoFormat *startFormat,
                 NSError *error) {
             if (!error) {
