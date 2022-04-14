@@ -442,6 +442,11 @@ export default class TwilioVideo extends Component {
         if (this.props.onDominantSpeakerDidChange) {
           this.props.onDominantSpeakerDidChange(data)
         }
+      }),
+      this._eventEmitter.addListener('cameraDidChangeOrientation', data => {
+        if (this.props.cameraDidChangeOrientation) {
+          this.props.cameraDidChangeOrientation(data)
+        }
       })
     ]
   }

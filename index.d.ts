@@ -105,7 +105,7 @@ declare module "react-native-twilio-video-webrtc" {
     onRoomParticipantDidConnect?: ParticipantEventCb;
     onRoomParticipantDidDisconnect?: ParticipantEventCb;
     onNetworkQualityLevelsChanged?: NetworkLevelChangeEventCb;
-
+    cameraDidChangeOrientation?: (orientation: any) => void;
     onStatsReceived?: (data: any) => void;
     onDataTrackMessageReceived?: DataTrackEventCb;
     // iOS only
@@ -129,6 +129,7 @@ declare module "react-native-twilio-video-webrtc" {
       videoWidth?: number;
       videoHeight?: number;
       videoFps?: number;
+      trackVideoOrientation?: boolean;
     };
     enableNetworkQualityReporting?: boolean;
   };
