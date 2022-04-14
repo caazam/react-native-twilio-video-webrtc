@@ -217,6 +217,13 @@ export default class TwilioVideo extends Component {
   }
 
   /**
+   * Update camera orientation by device orientation
+   */
+  changeCameraOrientation (orientation) {
+    TWVideoModule.changeCameraOrientation(orientation)
+  }
+
+  /**
    * Toggle audio setup from speaker (default) and headset
    */
   toggleSoundSetup (speaker) {
@@ -441,11 +448,6 @@ export default class TwilioVideo extends Component {
       this._eventEmitter.addListener('onDominantSpeakerDidChange', data => {
         if (this.props.onDominantSpeakerDidChange) {
           this.props.onDominantSpeakerDidChange(data)
-        }
-      }),
-      this._eventEmitter.addListener('cameraDidChangeOrientation', data => {
-        if (this.props.cameraDidChangeOrientation) {
-          this.props.cameraDidChangeOrientation(data)
         }
       })
     ]

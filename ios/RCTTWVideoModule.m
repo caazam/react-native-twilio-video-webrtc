@@ -37,12 +37,10 @@ static NSString* cameraDidStopRunning         = @"cameraDidStopRunning";
 static NSString* statsReceived                = @"statsReceived";
 static NSString* networkQualityLevelsChanged  = @"networkQualityLevelsChanged";
 
-static NSString* cameraDidChangeOrientation   = @"cameraDidChangeOrientation";
-
 CMVideoDimensions videoDimensions = (CMVideoDimensions){1280, 720};
 NSInteger videoFps = 30;
 
-@interface RCTTWVideoModule () <TVIRemoteDataTrackDelegate, TVIRemoteParticipantDelegate, TVIRoomDelegate, TVICameraSourceDelegate, TVILocalParticipantDelegate, TVICameraSourceOrientationDelegate>
+@interface RCTTWVideoModule () <TVIRemoteDataTrackDelegate, TVIRemoteParticipantDelegate, TVIRoomDelegate, TVICameraSourceDelegate, TVILocalParticipantDelegate>
 
 @property (strong, nonatomic) TVICameraSource *camera;
 @property (strong, nonatomic) TVILocalVideoTrack* localVideoTrack;
@@ -69,26 +67,6 @@ RCT_EXPORT_MODULE();
   return dispatch_get_main_queue();
 }
 
-- (void)onChangeOrientation {
-    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
-    if (self.camera.device.position == AVCaptureDevicePositionBack) {
-        if (orientation == UIDeviceOrientationPortrait) {
-            [self trackerOrientationDidChange:AVCaptureVideoOrientationPortrait];
-        } else if (orientation == UIDeviceOrientationLandscapeLeft) {
-            [self trackerOrientationDidChange:AVCaptureVideoOrientationLandscapeRight];
-        } else if (orientation == UIDeviceOrientationLandscapeRight) {
-            [self trackerOrientationDidChange:AVCaptureVideoOrientationLandscapeLeft];
-        }
-    } else {
-        [self trackerOrientationDidChange:AVCaptureVideoOrientationPortrait];
-    }
-}
-
-- (void)trackerOrientationDidChange:(AVCaptureVideoOrientation)orientation {
-    self.cameraOrientationTracker.orientation = orientation;
-    [self sendEventCheckingListenerWithName:cameraDidChangeOrientation body:@{@"orientation": [NSNumber numberWithLong:(long)orientation]}];
-}
-
 - (NSArray<NSString *> *)supportedEvents {
   return @[
     roomDidConnect,
@@ -113,8 +91,7 @@ RCT_EXPORT_MODULE();
     cameraInterruptionEnded,
     statsReceived,
     networkQualityLevelsChanged,
-    dominantSpeakerDidChange,
-    cameraDidChangeOrientation,
+    dominantSpeakerDidChange
   ];
 }
 
@@ -153,6 +130,10 @@ RCT_EXPORT_MODULE();
   }
 }
 
+RCT_EXPORT_METHOD(changeCameraOrientation:(NSInteger)orientation) {
+    self.cameraOrientationTracker.orientation = orientation;
+}
+
 RCT_EXPORT_METHOD(changeListenerStatus:(BOOL)value) {
     self.listening = value;
 }
@@ -168,7 +149,7 @@ RCT_EXPORT_METHOD(setRemoteAudioPlayback:(NSString *)participantSid enabled:(BOO
 }
 
 RCT_EXPORT_METHOD(startLocalVideo) {
-  self.cameraOrientationTracker = [[CameraVideoOrientationTracker alloc] initWithDelegate:self orientation:AVCaptureVideoOrientationPortrait];
+  self.cameraOrientationTracker = [[CameraVideoOrientationTracker alloc] initWithOrientation:AVCaptureVideoOrientationPortrait];
   TVICameraSourceOptions *options = [TVICameraSourceOptions optionsWithBlock:^(TVICameraSourceOptionsBuilder * _Nonnull builder) {
       builder.orientationTracker = self.cameraOrientationTracker;
   }];
@@ -423,9 +404,6 @@ RCT_EXPORT_METHOD(getStats) {
 
 RCT_EXPORT_METHOD(connect:(NSString *)accessToken roomName:(NSString *)roomName enableAudio:(BOOL *)enableAudio enableVideo:(BOOL *)enableVideo enableData:(BOOL *)enableData encodingParameters:(NSDictionary *)encodingParameters enableNetworkQualityReporting:(BOOL *)enableNetworkQualityReporting dominantSpeakerEnabled:(BOOL *)dominantSpeakerEnabled cameraType:(NSString *)cameraType)
 {
-  if (encodingParameters[@"trackVideoOrientation"]) {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onChangeOrientation) name:UIDeviceOrientationDidChangeNotification object:nil];
-  }
   if (encodingParameters[@"videoFps"]) {
     videoFps = [encodingParameters[@"videoFps"] integerValue];
   }
@@ -489,7 +467,6 @@ RCT_EXPORT_METHOD(sendString:(nonnull NSString *)message) {
 }
 
 RCT_EXPORT_METHOD(disconnect) {
-  [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
   [self clearCameraInstance];
   [self.room disconnect];
 }

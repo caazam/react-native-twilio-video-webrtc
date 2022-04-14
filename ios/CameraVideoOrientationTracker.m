@@ -8,10 +8,9 @@
 
 @synthesize orientation;
 
--(id)initWithDelegate:(id<TVICameraSourceOrientationDelegate>)delegate orientation:(AVCaptureVideoOrientation)orientation {
+-(id)initWithOrientation:(AVCaptureVideoOrientation)orientation {
     if (self = [super init]) {
         self.orientation = orientation;
-        self.delegate = delegate;
     }
     return self;
 }
