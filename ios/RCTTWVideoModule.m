@@ -149,7 +149,8 @@ RCT_EXPORT_METHOD(setRemoteAudioPlayback:(NSString *)participantSid enabled:(BOO
 }
 
 RCT_EXPORT_METHOD(startLocalVideo) {
-  self.cameraOrientationTracker = [[CameraVideoOrientationTracker alloc] initWithOrientation:AVCaptureVideoOrientationPortrait];
+  AVCaptureVideoOrientation currentOrientation = (AVCaptureVideoOrientation)[[UIApplication sharedApplication] statusBarOrientation];
+  self.cameraOrientationTracker = [[CameraVideoOrientationTracker alloc] initWithOrientation: currentOrientation];
   TVICameraSourceOptions *options = [TVICameraSourceOptions optionsWithBlock:^(TVICameraSourceOptionsBuilder * _Nonnull builder) {
       builder.orientationTracker = self.cameraOrientationTracker;
   }];
