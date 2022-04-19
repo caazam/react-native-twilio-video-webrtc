@@ -217,6 +217,13 @@ export default class TwilioVideo extends Component {
   }
 
   /**
+   * Update camera orientation by device orientation
+   */
+  changeCameraOrientation (orientation) {
+    TWVideoModule.changeCameraOrientation(orientation)
+  }
+
+  /**
    * Toggle audio setup from speaker (default) and headset
    */
   toggleSoundSetup (speaker) {

@@ -9,6 +9,7 @@
 #import "RCTTWVideoModule.h"
 
 #import "RCTTWSerializable.h"
+#import "CameraVideoOrientationTracker.h"
 
 static NSString* roomDidConnect               = @"roomDidConnect";
 static NSString* roomDidDisconnect            = @"roomDidDisconnect";
@@ -48,6 +49,7 @@ NSInteger videoFps = 30;
 @property (strong, nonatomic) TVILocalParticipant* localParticipant;
 @property (strong, nonatomic) TVIRoom *room;
 @property (nonatomic) BOOL listening;
+@property (strong, nonatomic) CameraVideoOrientationTracker *cameraOrientationTracker;
 
 @end
 
@@ -128,6 +130,10 @@ RCT_EXPORT_MODULE();
   }
 }
 
+RCT_EXPORT_METHOD(changeCameraOrientation:(NSInteger)orientation) {
+    self.cameraOrientationTracker.orientation = orientation;
+}
+
 RCT_EXPORT_METHOD(changeListenerStatus:(BOOL)value) {
     self.listening = value;
 }
@@ -143,8 +149,10 @@ RCT_EXPORT_METHOD(setRemoteAudioPlayback:(NSString *)participantSid enabled:(BOO
 }
 
 RCT_EXPORT_METHOD(startLocalVideo) {
+  AVCaptureVideoOrientation currentOrientation = (AVCaptureVideoOrientation)[[UIApplication sharedApplication] statusBarOrientation];
+  self.cameraOrientationTracker = [[CameraVideoOrientationTracker alloc] initWithOrientation: currentOrientation];
   TVICameraSourceOptions *options = [TVICameraSourceOptions optionsWithBlock:^(TVICameraSourceOptionsBuilder * _Nonnull builder) {
-
+      builder.orientationTracker = self.cameraOrientationTracker;
   }];
   self.camera = [[TVICameraSource alloc] initWithOptions:options delegate:self];
   if (self.camera == nil) {
@@ -426,7 +434,7 @@ RCT_EXPORT_METHOD(connect:(NSString *)accessToken roomName:(NSString *)roomName 
       builder.dataTracks = @[self.localDataTrack];
     }
   }
-      
+
     builder.dominantSpeakerEnabled = dominantSpeakerEnabled ? YES : NO;
 
     builder.roomName = roomName;

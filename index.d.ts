@@ -105,7 +105,6 @@ declare module "react-native-twilio-video-webrtc" {
     onRoomParticipantDidConnect?: ParticipantEventCb;
     onRoomParticipantDidDisconnect?: ParticipantEventCb;
     onNetworkQualityLevelsChanged?: NetworkLevelChangeEventCb;
-
     onStatsReceived?: (data: any) => void;
     onDataTrackMessageReceived?: DataTrackEventCb;
     // iOS only
@@ -161,6 +160,7 @@ declare module "react-native-twilio-video-webrtc" {
     publishLocalVideo: () => void;
     unpublishLocalVideo: () => void;
     sendString: (message: string) => void;
+    changeCameraOrientation: (orientation: number) => void;
   }
 
   class TwilioVideoLocalView extends React.Component<
