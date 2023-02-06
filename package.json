@@ -5,7 +5,7 @@
     "url": "https://github.com/caazam/react-native-twilio-video-webrtc.git"
   },
   "homepage": "https://github.com/caazam/react-native-twilio-video-webrtc",
-  "version": "2.3.1",
+  "version": "2.3.3",
   "description": "Twilio Video WebRTC for React Native.",
   "main": "index.js",
   "scripts": {
